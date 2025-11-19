@@ -7,6 +7,7 @@ import FaceParsing from './pages/models/FaceParsing';
 import SegmentationAnything from './pages/models/SegmentAnything';
 import RemoveBackground from './pages/models/RemoveBackground';
 import SmartEraser from './pages/models/SmartEraser';
+import RemoveBackgroundWebGPU from './pages/models/RemoveBackgroundWebGPU';
 
 function App() {
 	return (
@@ -19,6 +20,7 @@ function App() {
 					<Route path="/models/face-parsing" element={<FaceParsing />} />
 					<Route path="/models/segmentation-anything" element={<SegmentationAnything />} />
 					<Route path="/models/remove-background" element={<RemoveBackground />} />
+					<Route path="/models/remove-background-webgpu" element={<RemoveBackgroundWebGPU />} />
 					<Route path="/models/smart-eraser" element={<SmartEraser />} />
 				</Routes>
 			</Layout>

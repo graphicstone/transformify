@@ -7,7 +7,7 @@ import { saveAs } from 'file-saver';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 
-export default function RemoveBackground() {
+export default function RemoveBackgroundWebGPU() {
 	const [images, setImages] = useState([]);
 	const [processedImages, setProcessedImages] = useState([]);
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -21,31 +21,16 @@ export default function RemoveBackground() {
 	useEffect(() => {
 		(async () => {
 			try {
-				const model_id = 'briaai/RMBG-1.4';
-				env.allowLocalModels = false;
-				env.useBrowserCache = false;
-				env.backends.onnx.wasm.proxy = true;
+				if (!navigator.gpu) {
+					throw new Error('WebGPU is not supported in this browser.');
+				}
+				const model_id = 'Xenova/modnet';
+				env.backends.onnx.wasm.proxy = false;
 				modelRef.current ??= await AutoModel.from_pretrained(model_id, {
 					device: 'webgpu',
-					config: { model_type: 'custom' },
 				});
-				processorRef.current ??= await AutoProcessor.from_pretrained(model_id, {
-					// Do not require config.json to be present in the repository
-					config: {
-						do_normalize: true,
-						do_pad: false,
-						do_rescale: true,
-						do_resize: true,
-						image_mean: [0.5, 0.5, 0.5],
-						feature_extractor_type: 'ImageFeatureExtractor',
-						image_std: [1, 1, 1],
-						resample: 2,
-						rescale_factor: 0.00392156862745098,
-						size: { width: 1024, height: 1024 },
-					},
-				});
+				processorRef.current ??= await AutoProcessor.from_pretrained(model_id);
 			} catch (err) {
-				console.log('Error loading model:', err);
 				setError(err);
 			}
 			setIsLoading(false);
@@ -66,44 +51,31 @@ export default function RemoveBackground() {
 		},
 	});
 
-	const removeImage = (index) => {
-		setImages((prevImages) => prevImages.filter((_, i) => i !== index));
-		setProcessedImages((prevProcessed) => prevProcessed.filter((_, i) => i !== index));
-	};
-
 	const processImages = async () => {
 		setIsProcessing(true);
 		setProcessedImages([]);
 
+		const startTime = performance.now(); // Start timing
+
 		const model = modelRef.current;
 		const processor = processorRef.current;
 
-		const startTime = performance.now(); // Start timing
-
 		for (let i = 0; i < images.length; ++i) {
-			// Load image
 			const img = await RawImage.fromURL(images[i]);
-
-			// Pre-process image
 			const { pixel_values } = await processor(img);
-
-			// Predict alpha matte
 			const { output } = await model({ input: pixel_values });
 
 			const maskData = (
 				await RawImage.fromTensor(output[0].mul(255).to('uint8')).resize(img.width, img.height)
 			).data;
 
-			// Create new canvas
 			const canvas = document.createElement('canvas');
 			canvas.width = img.width;
 			canvas.height = img.height;
 			const ctx = canvas.getContext('2d');
 
-			// Draw original image output to canvas
 			ctx.drawImage(img.toCanvas(), 0, 0);
 
-			// Update alpha channel
 			const pixelData = ctx.getImageData(0, 0, img.width, img.height);
 			for (let i = 0; i < maskData.length; ++i) {
 				pixelData.data[4 * i + 3] = maskData[i];
@@ -158,16 +130,10 @@ export default function RemoveBackground() {
 
 	const copyToClipboard = async (url) => {
 		try {
-			// Fetch the image from the URL and convert it to a Blob
 			const response = await fetch(url);
 			const blob = await response.blob();
-
-			// Create a clipboard item with the image blob
 			const clipboardItem = new ClipboardItem({ [blob.type]: blob });
-
-			// Write the clipboard item to the clipboard
 			await navigator.clipboard.write([clipboardItem]);
-
 			console.log('Image copied to clipboard');
 		} catch (err) {
 			console.error('Failed to copy image: ', err);
@@ -181,6 +147,11 @@ export default function RemoveBackground() {
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);
+	};
+
+	const removeImage = (index) => {
+		setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+		setProcessedImages((prevProcessed) => prevProcessed.filter((_, i) => i !== index));
 	};
 
 	if (error) {
@@ -213,10 +184,9 @@ export default function RemoveBackground() {
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-8">
 			<div className="max-w-5xl mx-auto">
-				{/* Hero Section */}
 				<div className="text-center mb-12">
 					<Badge variant="purple" className="mb-4">
-						Background Removal
+						Background Removal WebGPU
 					</Badge>
 					<h1 className="text-4xl font-bold tracking-tight text-gray-900 mb-4">
 						Remove Background
@@ -261,14 +231,13 @@ export default function RemoveBackground() {
 					</div>
 				</div>
 
-				{/* Dropzone */}
 				<div
 					{...getRootProps()}
 					className={`p-12 mb-8 border-2 border-dashed rounded-xl text-center cursor-pointer transition-all duration-300 ease-in-out bg-white
-            ${isDragAccept ? 'border-green-500 bg-green-50' : ''}
-            ${isDragReject ? 'border-red-500 bg-red-50' : ''}
-            ${isDragActive ? 'border-purple-500 bg-purple-50' : 'border-gray-300 hover:border-purple-500 hover:bg-purple-50'}
-          `}
+                    ${isDragAccept ? 'border-green-500 bg-green-50' : ''}
+                    ${isDragReject ? 'border-red-500 bg-red-50' : ''}
+                    ${isDragActive ? 'border-purple-500 bg-purple-50' : 'border-gray-300 hover:border-purple-500 hover:bg-purple-50'}
+                    `}
 				>
 					<input {...getInputProps()} className="hidden" />
 					<Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
@@ -278,7 +247,6 @@ export default function RemoveBackground() {
 					<p className="text-sm text-gray-500">or click to select files</p>
 				</div>
 
-				{/* Action Buttons */}
 				<div className="flex flex-col items-center gap-4 mb-12">
 					<Button
 						onClick={processImages}
@@ -302,7 +270,6 @@ export default function RemoveBackground() {
 					</div>
 				</div>
 
-				{/* Image Grid */}
 				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 					{images.map((src, index) => (
 						<div

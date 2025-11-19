@@ -22,8 +22,8 @@ include a clear description of the feature and any potential use cases.
 2. **Clone Your Fork**: Clone your forked repository to your local machine.
 
    ```bash
-   git clone https://github.com/your-username/transformer-js-playground.git
-   cd transformer-js-playground
+   git clone https://github.com/graphicstone/transformify.git
+   cd transformify
    ```
 
 3. **Create a Branch**: Create a new branch for your feature or bug fix.

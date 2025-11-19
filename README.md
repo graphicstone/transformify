@@ -1,6 +1,8 @@
 # Transformer.js Playground
 
-Welcome to the Transformer.js Playground! This project is a browser-based application that leverages the power of machine learning models directly in your browser using [Transformer.js](https://huggingface.co/docs/transformers.js). It provides a variety of models for text and image processing tasks, all running client-side without the need for a server.
+Welcome to the Transformer.js Playground! This project is a browser-based application that leverages the power of
+machine learning models directly in your browser using [Transformer.js](https://huggingface.co/docs/transformers.js). It
+provides a variety of models for text and image processing tasks, all running client-side without the need for a server.
 
 ## Table of Contents
 
@@ -27,8 +29,8 @@ To get started with the Transformer.js Playground, follow these steps:
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/your-username/transformer-js-playground.git
-   cd transformer-js-playground
+   git clone https://github.com/graphicstone/transformify.git
+   cd transformify
    ```
 
 2. **Install dependencies**:
@@ -47,7 +49,8 @@ To get started with the Transformer.js Playground, follow these steps:
 
 ## Usage
 
-Once the application is running, you can explore different models and their capabilities. Navigate through the app using the provided links to access various models for text and image processing.
+Once the application is running, you can explore different models and their capabilities. Navigate through the app using
+the provided links to access various models for text and image processing.
 
 ### Running Models
 
@@ -66,6 +69,7 @@ Once the application is running, you can explore different models and their capa
 - **Face Parsing**: Parse facial features from images.
 - **Segment Anything**: Segment objects from images.
 - **Remove Background**: Remove backgrounds from images.
+- **Remove Background (WebGPU)**: Background removal utilising WebGPU.
 - **Smart Eraser**: Erase objects from images.
 
 ## Development

@@ -2,9 +2,17 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AutoProcessor, env, RawImage, SamModel, Tensor } from '@xenova/transformers';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
+import { debounce } from '@mui/material';
 
 env.allowLocalModels = false;
+const handleUpdatePoints = (e, { getPoint, setPoints, isEncoded, isMultiMaskMode, isDecoding }) => {
+	console.log('Mouse move triggered');
+	if (!isEncoded || isMultiMaskMode || isDecoding) return;
 
+	const point = getPoint(e);
+	console.log('point found', point);
+	setPoints([point]);
+};
 const EXAMPLE_URL =
 	'https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/corgi.jpg';
 
@@ -98,6 +106,7 @@ const SegmentAnything = () => {
 	};
 
 	const handleDecode = useCallback(async () => {
+		console.log('Decoding points');
 		if (!points || isDecoding || !isEncoded) return;
 
 		setIsDecoding(true);
@@ -207,6 +216,8 @@ const SegmentAnything = () => {
 		setPoints([point]);
 	};
 
+	const debouncedMouseMoveRef = React.useRef(debounce(handleUpdatePoints, 200));
+
 	const clearPointsAndMask = () => {
 		console.log('Clearing points and mask');
 		setIsMultiMaskMode(false);
@@ -315,7 +326,15 @@ const SegmentAnything = () => {
 							backgroundRepeat: 'no-repeat',
 						}}
 						onMouseDown={handleMouseDown}
-						onMouseMove={handleMouseMove}
+						onMouseMove={(e) =>
+							debouncedMouseMoveRef.current(e, {
+								getPoint,
+								setPoints,
+								isEncoded,
+								isMultiMaskMode,
+								isDecoding,
+							})
+						}
 						onContextMenu={(e) => e.preventDefault()}
 					>
 						<canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-60" />

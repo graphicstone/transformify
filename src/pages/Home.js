@@ -2,7 +2,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { ArrowRight, Brain, Image, MessageSquare, Sparkles } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
 const modelCategories = [
 	{
@@ -63,6 +63,13 @@ const modelCategories = [
 				name: 'Remove Background',
 				path: '/models/remove-background',
 				description: 'Remove background from images',
+				gradient: 'from-yellow-500 to-orange-500',
+			},
+			{
+				id: 'remove-background-webgpu',
+				name: 'Remove Background WebGPU',
+				path: '/models/remove-background-webgpu',
+				description: 'Remove background from images using WebGPU',
 				gradient: 'from-yellow-500 to-orange-500',
 			},
 			{
