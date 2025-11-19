@@ -113,6 +113,7 @@ const SegmentAnything = () => {
 		const reshaped = imageInputsRef.current.reshaped_input_sizes[0];
 
 		const pointCoords = points.map((x) => [x.point[0] * reshaped[1], x.point[1] * reshaped[0]]);
+		/* global BigInt */
 		const labels = points.map((x) => BigInt(x.label));
 
 		const input_points = new Tensor('float32', pointCoords.flat(Infinity), [
